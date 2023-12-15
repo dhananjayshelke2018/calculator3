@@ -1,0 +1,40 @@
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '30 14 * * MON-FRI'
+jobs:
+  build:
+    runs-on:  windows-latest
+    steps:
+      - name: Checkout to repsitory
+        uses:  actions/checkout@v3
+      - name: Download and setup JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distributor: 'temurin'
+        continue-on-error: true
+      - name: Download and setup maven
+        uses: stCarolas/setup-maven@v4.4
+        with:
+          maven-version:  3.2.2
+      - name: Build using maven
+        run: mvn clean install
+  test:
+      needs: build
+      runs-on: ${{  needs.build.outputs.runs-on }}
+      steps:
+        - name:  Run-Test
+          run:  mvn test -D"cucumber.filter.tags=calculator.feature"
+          env:
+            Display:  :19
+            CUCUMBER_PUBLISH_TOKEN:  362e90f9-3508-4215-88ac-273a9e4d136b
+            continue-on-error:  true
+        - uses:  actions/upload-artifact@v3
+          if: always()
+          with:
+              name: Report
+              path: test-output
+              retention-days:  30
