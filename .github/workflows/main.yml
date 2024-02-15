@@ -2,8 +2,7 @@ on:
   push:
     branches:
       - master
-  # schedule:
-  #   - cron: '30 14 * * MON-FRI'
+  
 jobs:
   build:
     runs-on:  windows-latest
